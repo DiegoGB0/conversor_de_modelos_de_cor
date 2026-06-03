@@ -1,8 +1,9 @@
 import cv2
 
-def aplicar(imagem, valor):
+def aplicar_brilho(imagem, valor):
+
     return cv2.convertScaleAbs(
         imagem,
-        alpha=1,
+        alpha=1.0,
         beta=valor
     )

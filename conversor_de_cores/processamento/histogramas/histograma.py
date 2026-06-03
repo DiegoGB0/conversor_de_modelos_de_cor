@@ -1,7 +1,16 @@
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+import tkinter as tk
 import cv2
-import matplotlib.pyplot as plt
 
-def mostrar_histograma(imagem):
+
+def mostrar_histograma(imagem, titulo="RGB"):
+    janela = tk.Toplevel()
+    janela.title(f"Histograma - {titulo}")
+    janela.geometry("800x600")
+
+    fig = Figure(figsize=(8, 5))
+    ax = fig.add_subplot(111)
 
     cores = ("b", "g", "r")
 
@@ -14,10 +23,20 @@ def mostrar_histograma(imagem):
             [0, 256]
         )
 
-        plt.plot(hist)
+        ax.plot(hist, color=cor)
 
-    plt.title("Histograma RGB")
-    plt.xlabel("Intensidade")
-    plt.ylabel("Quantidade de Pixels")
+    ax.set_title(f"Histograma do Modelo {titulo}")
+    ax.set_xlabel("Intensidade")
+    ax.set_ylabel("Quantidade de Pixels")
 
-    plt.show()
+    canvas = FigureCanvasTkAgg(
+        fig,
+        master=janela
+    )
+
+    canvas.draw()
+
+    canvas.get_tk_widget().pack(
+        fill="both",
+        expand=True
+    )
