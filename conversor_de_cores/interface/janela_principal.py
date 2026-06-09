@@ -26,9 +26,24 @@ from processamento.conversores.rgb_para_cmy import converter as rgb_para_cmy
 #criar botao
 from interface.componentes import criar_botao
 
+from interface.estilos import (
+    criar_titulo,
+    criar_label_ajuste,
+    criar_frame_imagens,
+    criar_frame_ajustes,
+    criar_frame_botoes,
+    criar_grupo,
+    criar_divisoria
+)
+
+import customtkinter as ctk
+
 class JanelaPrincipal:
     def __init__(self):
-        self.janela = tk.Tk()
+        ctk.set_appearance_mode("light")
+        ctk.set_default_color_theme("blue")
+        
+        self.janela = ctk.CTk()
         self.imagem = None
         self.imagem_original = None
         self.imagem_base = None
@@ -46,126 +61,190 @@ class JanelaPrincipal:
 
     def criar_componentes(self):
 
-        # Frame das imagens
-        frame_imagens = tk.Frame(self.janela)
-        frame_imagens.pack(pady=20)
+        # Área principal
+        frame_principal = ctk.CTkFrame(self.janela)
+        frame_principal.pack(pady=20)
 
-        # Imagem original
-        frame_original = tk.Frame(frame_imagens)
-        frame_original.pack(side="left", padx=30)
+        # area das imagens
+        frame_imagens = criar_frame_imagens(
+            frame_principal
+        )
 
-        tk.Label(
+        # area dos ajustes
+        frame_ajustes = criar_frame_ajustes(
+            frame_principal
+        )
+        
+        #area dos botoes
+        frame_botoes = criar_frame_botoes(
+            self.janela
+        )
+        # GRUPOS DE BOTÕES
+        grupo_1 = criar_grupo(frame_botoes)
+
+        criar_divisoria(frame_botoes)
+
+        grupo_2 = criar_grupo(frame_botoes)
+
+        criar_divisoria(frame_botoes)
+
+        grupo_3 = criar_grupo(frame_botoes)
+
+        criar_divisoria(frame_botoes)
+
+        grupo_4 = criar_grupo(frame_botoes)
+
+        # ---------------- IMAGEM ORIGINAL ----------------
+
+        frame_original = ctk.CTkFrame(frame_imagens)
+        frame_original.pack(
+            side="left",
+            padx=30
+        )
+
+        criar_titulo(
             frame_original,
-            text="Imagem Original",
-            font=("Arial", 12, "bold")
-        ).pack()
+            "Imagem Original"
+        )
 
-        self.label_original = tk.Label(frame_original)
+        self.label_original = ctk.CTkLabel(
+            frame_original,
+            text=""
+        )
+
         self.label_original.pack()
 
-        # Imagem modificada
-        frame_modificada = tk.Frame(frame_imagens)
-        frame_modificada.pack(side="left", padx=30)
+        # ---------------- IMAGEM MODIFICADA ----------------
 
-        tk.Label(
+        frame_modificada = ctk.CTkFrame(
+            frame_imagens
+        )
+
+        frame_modificada.pack(
+            side="left",
+            padx=30
+        )
+
+        criar_titulo(
             frame_modificada,
-            text="Imagem Modificada",
-            font=("Arial", 12, "bold")
-        ).pack()
+            "Imagem Modificada"
+        )
 
-        self.label_modificada = tk.Label(frame_modificada)
+        self.label_modificada = ctk.CTkLabel(
+            frame_modificada,
+            text=""
+        )
+
         self.label_modificada.pack()
 
-        # Botões
+        # ---------------- BOTÕES ----------------
+
         criar_botao(
-            self.janela,
+            grupo_1,
             "Abrir Imagem",
             self.abrir_imagem
         )
 
         criar_botao(
-            self.janela,
+            grupo_1,
             "Voltar à Original",
             self.voltar_original
         )
 
-        # Brilho
-        tk.Label(
-            self.janela,
-            text="Brilho"
-        ).pack()
+# ---------------- BRILHO ----------------
 
-        self.slider_brilho = tk.Scale(
-            self.janela,
-            from_=-100,
-            to=100,
-            orient="horizontal",
-            length=300,
-            command=self.atualizar_imagem
+        criar_label_ajuste(
+            frame_ajustes,
+            "☀ Brilho"
         )
 
-        self.slider_brilho.pack()
-
-        # Contraste
-        tk.Label(
-            self.janela,
-            text="Contraste"
-        ).pack()
-
-        self.slider_contraste = tk.Scale(
-            self.janela,
+        self.slider_brilho = ctk.CTkSlider(
+            frame_ajustes,
             from_=-100,
             to=100,
-            orient="horizontal",
-            length=300,
-            command=self.atualizar_imagem
+            command=self.atualizar_imagem,
+            width=220
         )
 
-        self.slider_contraste.pack()
-        
-        #saturação
-        tk.Label(
-            self.janela,
-            text="Saturação"
-        ).pack()
+        self.slider_brilho.set(0)
 
-        self.slider_saturacao = tk.Scale(
-            self.janela,
+        self.slider_brilho.pack(
+            padx=15,
+            pady=10
+        )
+
+        # ---------------- CONTRASTE ----------------
+
+        criar_label_ajuste(
+            frame_ajustes,
+            "◐ Contraste"
+        )
+
+        self.slider_contraste = ctk.CTkSlider(
+            frame_ajustes,
             from_=-100,
             to=100,
-            orient="horizontal",
-            length=300,
-            command=self.atualizar_imagem
+            command=self.atualizar_imagem,
+            width=220
         )
 
-        self.slider_saturacao.pack()
+        self.slider_contraste.set(0)
+
+        self.slider_contraste.pack(
+            padx=15,
+            pady=10
+        )
+
+        # ---------------- SATURAÇÃO ----------------
+
+        criar_label_ajuste(
+            frame_ajustes,
+            "🎨 Saturação"
+        )
+
+        self.slider_saturacao = ctk.CTkSlider(
+            frame_ajustes,
+            from_=-100,
+            to=100,
+            command=self.atualizar_imagem,
+            width=220
+        )
+
+        self.slider_saturacao.set(0)
+
+        self.slider_saturacao.pack(
+            padx=15,
+            pady=10
+        )
+
+        # ---------------- OUTROS BOTÕES ----------------
 
         criar_botao(
-            self.janela,
+            grupo_3,
             "Mostrar Histograma",
             self.abrir_histograma
         )
-        
+
         criar_botao(
-            self.janela,
+            grupo_2,
             "Converter para HSV",
             self.converter_para_hsv
         )
 
         criar_botao(
-            self.janela,
+            grupo_2,
             "Converter para CMYK",
             self.converter_para_cmyk
         )
 
         criar_botao(
-            self.janela,
+            grupo_2,
             "Converter para CMY",
             self.converter_para_cmy
         )
 
         criar_botao(
-            self.janela,
+            grupo_4,
             "Salvar Imagem",
             self.salvar_imagem
         )
@@ -190,25 +269,23 @@ class JanelaPrincipal:
         self.exibir_imagem_original(self.imagem_original)
         self.exibir_imagem(self.imagem)
 
-    def exibir_imagem_original(self, imagem):
+    def exibir_imagem_label(self, label, imagem):
 
         img = imagem.copy()
         img.thumbnail((600, 450))
 
         img_tk = ImageTk.PhotoImage(img)
 
-        self.label_original.config(image=img_tk)
-        self.label_original.image = img_tk
+        label.configure(image=img_tk)
+        label.image = img_tk
+
+
+    def exibir_imagem_original(self, imagem):
+        self.exibir_imagem_label(self.label_original, imagem)
+
 
     def exibir_imagem(self, imagem):
-
-        img = imagem.copy()
-        img.thumbnail((600, 450))
-
-        img_tk = ImageTk.PhotoImage(img)
-
-        self.label_modificada.config(image=img_tk)
-        self.label_modificada.image = img_tk
+        self.exibir_imagem_label(self.label_modificada, imagem)
 
     # ---------------- AJUSTES ----------------
 
@@ -289,29 +366,6 @@ class JanelaPrincipal:
             titulo=self.modelo_atual
         )
         
-    #------------------ PIXEL ----------------
-    '''def mostrar_pixel(self, evento):
-
-        if self.imagem is None:
-            return
-
-        x = evento.x
-        y = evento.y
-
-        img_np = converter_para_numpy(self.imagem)
-
-        altura, largura = img_np.shape[:2]
-
-        if x >= largura or y >= altura:
-            return
-
-        b = img_np[y, x, 0]
-        g = img_np[y, x, 1]
-        r = img_np[y, x, 2]
-
-        self.label_pixel.config(
-            text=f"X={x} Y={y} | R={r} G={g} B={b}"
-        )'''
 
     # ---------------- CONVERSÕES ----------------
 
