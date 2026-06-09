@@ -18,18 +18,13 @@ from processamento.ajustes.brilho import aplicar_brilho
 from processamento.ajustes.contraste import aplicar_contraste
 from processamento.ajustes.saturacao import aplicar_saturacao
 
-# HSV
+# CONVERSORES
 from processamento.conversores.rgb_para_hsv import converter as rgb_para_hsv
-from processamento.conversores.hsv_para_rgb import converter as hsv_para_rgb
-
-# CMYK
 from processamento.conversores.rgb_para_cmyk import converter as rgb_para_cmyk
-from processamento.conversores.cmyk_para_rgb import converter as cmyk_para_rgb
-
-# CMY
 from processamento.conversores.rgb_para_cmy import converter as rgb_para_cmy
-from processamento.conversores.cmy_para_rgb import converter as cmy_para_rgb
 
+#criar botao
+from interface.componentes import criar_botao
 
 class JanelaPrincipal:
     def __init__(self):
@@ -80,23 +75,19 @@ class JanelaPrincipal:
 
         self.label_modificada = tk.Label(frame_modificada)
         self.label_modificada.pack()
-        '''self.label_modificada.bind(
-            "<Motion>",
-            self.mostrar_pixel
-        )'''
 
         # Botões
-        tk.Button(
+        criar_botao(
             self.janela,
-            text="Abrir Imagem",
-            command=self.abrir_imagem
-        ).pack(pady=5)
+            "Abrir Imagem",
+            self.abrir_imagem
+        )
 
-        tk.Button(
+        criar_botao(
             self.janela,
-            text="Voltar à Original",
-            command=self.voltar_original
-        ).pack(pady=5)
+            "Voltar à Original",
+            self.voltar_original
+        )
 
         # Brilho
         tk.Label(
@@ -149,48 +140,35 @@ class JanelaPrincipal:
 
         self.slider_saturacao.pack()
 
-        tk.Button(
+        criar_botao(
             self.janela,
-            text="Mostrar Histograma",
-            command=self.abrir_histograma
-        ).pack(pady=5)
+            "Mostrar Histograma",
+            self.abrir_histograma
+        )
         
-#------------------ PIXEL ----------------
-
-        '''self.label_pixel = tk.Label(
+        criar_botao(
             self.janela,
-            text="Pixel: ---",
-            font=("Arial", 10)
+            "Converter para HSV",
+            self.converter_para_hsv
         )
 
-        self.label_pixel.pack(pady=5)'''
-        
-       
-
-        tk.Button(
+        criar_botao(
             self.janela,
-            text="Converter para HSV",
-            command=self.converter_para_hsv
-        ).pack(pady=5)
+            "Converter para CMYK",
+            self.converter_para_cmyk
+        )
 
-        tk.Button(
+        criar_botao(
             self.janela,
-            text="Converter para CMYK",
-            command=self.converter_para_cmyk
-        ).pack(pady=5)
+            "Converter para CMY",
+            self.converter_para_cmy
+        )
 
-        tk.Button(
+        criar_botao(
             self.janela,
-            text="Converter para CMY",
-            command=self.converter_para_cmy
-        ).pack(pady=5)
-        
-        tk.Button(
-            self.janela,
-            text="Salvar Imagem",
-            command=self.salvar_imagem
-        ).pack(pady=5)
-
+            "Salvar Imagem",
+            self.salvar_imagem
+        )
     # ---------------- IMAGEM ----------------
 
     def abrir_imagem(self):
