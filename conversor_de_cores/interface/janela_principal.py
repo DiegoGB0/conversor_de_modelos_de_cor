@@ -13,9 +13,10 @@ from processamento.imagem import (
     converter_para_pil
 )
 
-#ajustes
+# ajustes
 from processamento.ajustes.brilho import aplicar_brilho
 from processamento.ajustes.contraste import aplicar_contraste
+from processamento.ajustes.saturacao import aplicar_saturacao
 
 # HSV
 from processamento.conversores.rgb_para_hsv import converter as rgb_para_hsv
@@ -24,6 +25,7 @@ from processamento.conversores.hsv_para_rgb import converter as hsv_para_rgb
 # CMYK
 from processamento.conversores.rgb_para_cmyk import converter as rgb_para_cmyk
 from processamento.conversores.cmyk_para_rgb import converter as cmyk_para_rgb
+
 # CMY
 from processamento.conversores.rgb_para_cmy import converter as rgb_para_cmy
 from processamento.conversores.cmy_para_rgb import converter as cmy_para_rgb
@@ -33,9 +35,12 @@ class JanelaPrincipal:
     def __init__(self):
         self.janela = tk.Tk()
         self.imagem = None
+        self.imagem_original = None
+        self.imagem_base = None
 
         self.configurar_janela()
         self.criar_componentes()
+
         self.modelo_atual = "RGB"
 
     def configurar_janela(self):
@@ -43,25 +48,57 @@ class JanelaPrincipal:
         self.janela.geometry("1600x800")
 
     # ---------------- UI ----------------
-    #jogar isso nos componentes.py
-    
+
     def criar_componentes(self):
 
-        self.label_imagem = tk.Label(self.janela)
-        self.label_imagem.pack(pady=20)
+        # Frame das imagens
+        frame_imagens = tk.Frame(self.janela)
+        frame_imagens.pack(pady=20)
 
+        # Imagem original
+        frame_original = tk.Frame(frame_imagens)
+        frame_original.pack(side="left", padx=30)
+
+        tk.Label(
+            frame_original,
+            text="Imagem Original",
+            font=("Arial", 12, "bold")
+        ).pack()
+
+        self.label_original = tk.Label(frame_original)
+        self.label_original.pack()
+
+        # Imagem modificada
+        frame_modificada = tk.Frame(frame_imagens)
+        frame_modificada.pack(side="left", padx=30)
+
+        tk.Label(
+            frame_modificada,
+            text="Imagem Modificada",
+            font=("Arial", 12, "bold")
+        ).pack()
+
+        self.label_modificada = tk.Label(frame_modificada)
+        self.label_modificada.pack()
+        '''self.label_modificada.bind(
+            "<Motion>",
+            self.mostrar_pixel
+        )'''
+
+        # Botões
         tk.Button(
             self.janela,
             text="Abrir Imagem",
             command=self.abrir_imagem
         ).pack(pady=5)
-        # ----------------
+
         tk.Button(
             self.janela,
             text="Voltar à Original",
             command=self.voltar_original
         ).pack(pady=5)
-        # ---------------- BRILHO ----------------
+
+        # Brilho
         tk.Label(
             self.janela,
             text="Brilho"
@@ -73,12 +110,12 @@ class JanelaPrincipal:
             to=100,
             orient="horizontal",
             length=300,
-            command=self.ajustar_brilho
+            command=self.atualizar_imagem
         )
 
         self.slider_brilho.pack()
 
-        # ---------------- CONTRASTE ----------------
+        # Contraste
         tk.Label(
             self.janela,
             text="Contraste"
@@ -90,37 +127,72 @@ class JanelaPrincipal:
             to=100,
             orient="horizontal",
             length=300,
-            command=self.ajustar_contraste
+            command=self.atualizar_imagem
         )
 
         self.slider_contraste.pack()
-        #------------------
+        
+        #saturação
+        tk.Label(
+            self.janela,
+            text="Saturação"
+        ).pack()
+
+        self.slider_saturacao = tk.Scale(
+            self.janela,
+            from_=-100,
+            to=100,
+            orient="horizontal",
+            length=300,
+            command=self.atualizar_imagem
+        )
+
+        self.slider_saturacao.pack()
+
         tk.Button(
             self.janela,
             text="Mostrar Histograma",
             command=self.abrir_histograma
         ).pack(pady=5)
+        
+#------------------ PIXEL ----------------
+
+        '''self.label_pixel = tk.Label(
+            self.janela,
+            text="Pixel: ---",
+            font=("Arial", 10)
+        )
+
+        self.label_pixel.pack(pady=5)'''
+        
+       
+
         tk.Button(
             self.janela,
             text="Converter para HSV",
             command=self.converter_para_hsv
         ).pack(pady=5)
-        # ----------------
+
         tk.Button(
             self.janela,
             text="Converter para CMYK",
             command=self.converter_para_cmyk
         ).pack(pady=5)
-        # ----------------
+
         tk.Button(
             self.janela,
             text="Converter para CMY",
             command=self.converter_para_cmy
         ).pack(pady=5)
-        #------------------
-
+        
+        tk.Button(
+            self.janela,
+            text="Salvar Imagem",
+            command=self.salvar_imagem
+        ).pack(pady=5)
 
     # ---------------- IMAGEM ----------------
+
     def abrir_imagem(self):
         caminho = filedialog.askopenfilename(
             filetypes=[("Imagens", "*.png *.jpg *.jpeg *.bmp")]
@@ -131,130 +203,241 @@ class JanelaPrincipal:
 
     def carregar_imagem(self, caminho):
         self.imagem_original = abrir_imagem(caminho)
-        self.imagem = self.imagem_original.copy()
+        self.imagem_base = self.imagem_original.copy()
+        self.imagem = self.imagem_base.copy()
+
         self.slider_brilho.set(0)
         self.slider_contraste.set(0)
+        self.slider_saturacao.set(0)
+        self.exibir_imagem_original(self.imagem_original)
         self.exibir_imagem(self.imagem)
 
-    def exibir_imagem(self, imagem):
+    def exibir_imagem_original(self, imagem):
+
         img = imagem.copy()
-        img.thumbnail((800, 500))
+        img.thumbnail((600, 450))
 
         img_tk = ImageTk.PhotoImage(img)
 
-        self.label_imagem.config(image=img_tk)
-        self.label_imagem.image = img_tk
+        self.label_original.config(image=img_tk)
+        self.label_original.image = img_tk
 
-        # ---------------- BRILHO ----------------
-    def ajustar_brilho(self, valor):
+    def exibir_imagem(self, imagem):
 
-        if self.imagem is None:
+        img = imagem.copy()
+        img.thumbnail((600, 450))
+
+        img_tk = ImageTk.PhotoImage(img)
+
+        self.label_modificada.config(image=img_tk)
+        self.label_modificada.image = img_tk
+
+    # ---------------- AJUSTES ----------------
+
+    def atualizar_imagem(self, valor=None):
+
+        if self.imagem_original is None:
             return
 
         img_np = converter_para_numpy(
-            self.imagem_original
+            self.imagem_base
         )
 
-        img_brilho = aplicar_brilho(
+        # brilho
+        brilho = self.slider_brilho.get()
+
+        img_np = aplicar_brilho(
             img_np,
-            int(valor)
+            brilho
+        )
+
+        # contraste
+        contraste = self.slider_contraste.get()
+
+        img_np = aplicar_contraste(
+            img_np,
+            contraste
+        )
+        
+        #saturação
+        saturacao = self.slider_saturacao.get()
+
+        img_np = aplicar_saturacao(
+            img_np,
+            saturacao
         )
 
         self.imagem = converter_para_pil(
-            img_brilho
+            img_np
         )
 
         self.exibir_imagem(
             self.imagem
         )
 
-    # ---------------- CONTRASTE ----------------
-    def ajustar_contraste(self, valor):
+    # ---------------- VOLTAR ----------------
 
-        if self.imagem is None:
-            return
-
-        img_np = converter_para_numpy(
-            self.imagem_original
-        )
-
-        img_contraste = aplicar_contraste(
-            img_np,
-            int(valor)
-        )
-
-        self.imagem = converter_para_pil(
-            img_contraste
-        )
-
-        self.exibir_imagem(
-            self.imagem
-        )    
-
-    # ----------------  VOLTAR ----------------
     def voltar_original(self):
 
-        if not hasattr(self, "imagem_original"):
+        if self.imagem_original is None:
             return
-
+        
+        self.imagem_base = self.imagem_original.copy()
         self.imagem = self.imagem_original.copy()
-        self.exibir_imagem(self.imagem)
+
+        self.exibir_imagem(
+            self.imagem
+        )
+
         self.slider_brilho.set(0)
         self.slider_contraste.set(0)
+        self.slider_saturacao.set(0)
+
         self.modelo_atual = "RGB"
+
     # ---------------- HISTOGRAMA ----------------
+
     def abrir_histograma(self):
 
         if self.imagem is None:
             return
 
-        img_np = converter_para_numpy(self.imagem)
+        img_np = converter_para_numpy(
+            self.imagem
+        )
 
         mostrar_histograma(
             img_np,
             titulo=self.modelo_atual
         )
-
-    # ---------------- CONVERSÕES ----------------
-    def converter_para_hsv(self):
+        
+    #------------------ PIXEL ----------------
+    '''def mostrar_pixel(self, evento):
 
         if self.imagem is None:
             return
 
-        img_np = converter_para_numpy(self.imagem_original)
-        img_hsv = rgb_para_hsv(img_np)
-        self.imagem = converter_para_pil(img_hsv)
-        self.exibir_imagem(self.imagem)
-        self.modelo_atual = "HSV"
+        x = evento.x
+        y = evento.y
 
+        img_np = converter_para_numpy(self.imagem)
+
+        altura, largura = img_np.shape[:2]
+
+        if x >= largura or y >= altura:
+            return
+
+        b = img_np[y, x, 0]
+        g = img_np[y, x, 1]
+        r = img_np[y, x, 2]
+
+        self.label_pixel.config(
+            text=f"X={x} Y={y} | R={r} G={g} B={b}"
+        )'''
+
+    # ---------------- CONVERSÕES ----------------
+
+    def converter_para_hsv(self):
+
+        if self.imagem_original is None:
+            return
+
+        img_np = converter_para_numpy(
+            self.imagem_original
+        )
+
+        img_hsv = rgb_para_hsv(
+            img_np
+        )
+
+        self.imagem_base = converter_para_pil(
+            img_hsv
+        )
+        
+        self.imagem = self.imagem_base.copy()
+
+        self.exibir_imagem(
+            self.imagem
+        )
+
+        self.modelo_atual = "HSV"
 
     def converter_para_cmyk(self):
 
-        if self.imagem is None:
+        if self.imagem_original is None:
             return
 
-        img_np = converter_para_numpy(self.imagem_original)
-        img_cmyk = rgb_para_cmyk(img_np)
-        img_cmy_vis = (img_cmyk[:, :, :3] * 255).astype(np.uint8)
-        self.imagem = converter_para_pil(img_cmy_vis)
-        self.exibir_imagem(self.imagem)
+        img_np = converter_para_numpy(
+            self.imagem_original
+        )
+
+        img_cmyk = rgb_para_cmyk(
+            img_np
+        )
+
+        img_cmy_vis = (
+            img_cmyk[:, :, :3] * 255
+        ).astype(np.uint8)
+
+        self.imagem_base = converter_para_pil(
+            img_cmy_vis
+        )
+        self.imagem = self.imagem_base.copy()
+
+        self.exibir_imagem(
+            self.imagem
+        )
+
         self.modelo_atual = "CMYK"
 
     def converter_para_cmy(self):
 
+        if self.imagem_original is None:
+            return
+
+        img_np = converter_para_numpy(
+            self.imagem_original
+        )
+
+        img_cmy = rgb_para_cmy(
+            img_np
+        )
+
+        img_cmy_vis = (
+            img_cmy * 255
+        ).astype(np.uint8)
+
+        self.imagem_base = converter_para_pil(
+            img_cmy_vis
+        )
+        self.imagem = self.imagem_base.copy()
+
+        self.exibir_imagem(
+            self.imagem
+        )
+
+        self.modelo_atual = "CMY"
+    
+#------------------ SALVAR IMAGEM ----------------
+        
+    def salvar_imagem(self):
+
         if self.imagem is None:
             return
 
-        img_np = converter_para_numpy(self.imagem_original)
+        caminho = filedialog.asksaveasfilename(
+            defaultextension=".png",
+            filetypes=[
+                ("PNG", "*.png"),
+                ("JPEG", "*.jpg"),
+                ("BMP", "*.bmp")
+            ]
+        )
 
-        img_cmy = rgb_para_cmy(img_np)
+        if caminho:
+            self.imagem.save(caminho)
 
-        img_cmy_vis = (img_cmy * 255).astype(np.uint8)
-
-        self.imagem = converter_para_pil(img_cmy_vis)
-
-        self.exibir_imagem(self.imagem)
-        self.modelo_atual = "CMY"
     # ---------------- EXECUÇÃO ----------------
+
     def executar(self):
         self.janela.mainloop()
