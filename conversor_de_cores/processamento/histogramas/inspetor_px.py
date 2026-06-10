@@ -218,12 +218,24 @@ def abrir_inspetor(imagem):
         y = int(
             y_tela * altura_original / altura_exibida
         )
+        
+        pixel = imagem[y, x]
 
-        b = int(imagem[y, x, 0])
+        print("Pixel bruto:", pixel)
+
+        r, g, b = pixel
+        r = int(imagem[y, x, 0])
         g = int(imagem[y, x, 1])
-        r = int(imagem[y, x, 2])
+        b = int(imagem[y, x, 2])
 
         hex_cor = f"#{r:02X}{g:02X}{b:02X}"
+        
+        print(f"B={b} G={g} R={r}")
+        print(f"HEX = #{r:02X}{g:02X}{b:02X}")
+
+
+
+        #hex_cor = f"#{r:02X}{g:02X}{b:02X}"
 
         # ---------- INFO ----------
 
@@ -249,7 +261,7 @@ def abrir_inspetor(imagem):
 
         fim_x = min(
             largura_original,
-            x + 10
+            x + 11
         )
 
         inicio_y = max(
@@ -259,8 +271,17 @@ def abrir_inspetor(imagem):
 
         fim_y = min(
             altura_original,
-            y + 10
+            y + 11
         )
+        
+        regiao = imagem[
+                inicio_y:fim_y,
+                inicio_x:fim_x
+            ]
+                    
+        print("Pixel central da lupa:",
+             regiao[regiao.shape[0] // 2,
+             regiao.shape[1] // 2])
 
         regiao = imagem[
             inicio_y:fim_y,
