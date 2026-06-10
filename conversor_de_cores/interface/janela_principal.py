@@ -63,7 +63,11 @@ class JanelaPrincipal:
 
         # Área principal
         frame_principal = ctk.CTkFrame(self.janela)
-        frame_principal.pack(pady=20)
+        frame_principal.pack(
+            anchor="w",
+            padx=50,
+            pady=20
+        )
 
         # area das imagens
         frame_imagens = criar_frame_imagens(

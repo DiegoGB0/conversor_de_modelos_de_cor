@@ -70,7 +70,8 @@ def criar_frame_botoes(master):
     frame = ctk.CTkFrame(master)
 
     frame.pack(
-        fill="x",
+        anchor="w",
+        padx=50,
         pady=15
     )
 

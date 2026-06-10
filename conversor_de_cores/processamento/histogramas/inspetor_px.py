@@ -1,10 +1,10 @@
-import tkinter as tk
-from PIL import Image, ImageTk
+import customtkinter as ctk
+from PIL import Image, ImageTk, ImageDraw
 
 
 def abrir_inspetor(imagem):
 
-    janela = tk.Toplevel()
+    janela = ctk.CTkToplevel()
 
     janela.title("Inspetor de Pixels")
     janela.geometry("1200x800")
@@ -14,69 +14,191 @@ def abrir_inspetor(imagem):
         lambda e: janela.destroy()
     )
 
-    tk.Label(
-        janela,
-        text="Modo inspeção ativo. Pressione ESC para sair.",
-        font=("Arial", 12, "bold")
-    ).pack(pady=10)
+    # ================= CONTAINER PRINCIPAL =================
 
-    # ---------------- IMAGEM ----------------
+    frame_principal = ctk.CTkFrame(
+        janela,
+        fg_color="transparent"
+    )
+
+    frame_principal.pack(
+        fill="both",
+        expand=True,
+        padx=20,
+        pady=20
+    )
+
+    # ================= ÁREA DA IMAGEM =================
+
+    frame_imagem = ctk.CTkFrame(
+        frame_principal
+    )
+
+    frame_imagem.pack(
+        side="left",
+        fill="both",
+        expand=True,
+        padx=(0, 15)
+    )
+
+    ctk.CTkLabel(
+        frame_imagem,
+        text="IMAGEM DE INSPEÇÃO",
+        font=("Arial", 18, "bold")
+    ).pack(pady=15)
 
     altura_original, largura_original = imagem.shape[:2]
 
     img_pil = Image.fromarray(imagem)
 
-    img_pil.thumbnail((700, 500))
+    img_pil.thumbnail(
+        (800, 650)
+    )
 
     largura_exibida = img_pil.width
     altura_exibida = img_pil.height
 
-    img_tk = ImageTk.PhotoImage(img_pil)
+    img_tk = ImageTk.PhotoImage(
+        img_pil
+    )
 
-    label_img = tk.Label(
-        janela,
-        image=img_tk,
-        cursor="crosshair"
+    label_img = ctk.CTkLabel(
+        frame_imagem,
+        text="",
+        image=img_tk
     )
 
     label_img.image = img_tk
-    label_img.pack()
 
-    # ---------------- INFORMAÇÕES ----------------
+    label_img.pack(
+        pady=10
+    )
 
-    label_info = tk.Label(
-        janela,
+    label_img.configure(
+        cursor="crosshair"
+    )
+
+    # ================= PAINEL LATERAL =================
+
+    frame_lateral = ctk.CTkFrame(
+        frame_principal,
+        width=300
+    )
+
+    frame_lateral.pack(
+        side="right",
+        fill="y"
+    )
+
+    frame_lateral.pack_propagate(
+        False
+    )
+
+    # ---------- TÍTULO ----------
+
+    ctk.CTkLabel(
+        frame_lateral,
+        text="DETALHES DO PIXEL",
+        font=("Arial", 16, "bold")
+    ).pack(
+        anchor="w",
+        padx=15,
+        pady=(20, 15)
+    )
+
+    # ---------- INFORMAÇÕES ----------
+
+    label_info = ctk.CTkLabel(
+        frame_lateral,
         text="Passe o mouse sobre a imagem",
-        font=("Arial", 12, "bold"),
+        justify="left",
+        anchor="w",
+        font=("Arial", 14)
+    )
+
+    label_info.pack(
+        anchor="w",
+        padx=15,
+        pady=(0, 20)
+    )
+
+    # ---------- AMOSTRA DE COR ----------
+
+    ctk.CTkLabel(
+        frame_lateral,
+        text="AMOSTRA DE COR",
+        font=("Arial", 14, "bold")
+    ).pack(
+        anchor="w",
+        padx=15
+    )
+
+    label_cor = ctk.CTkFrame(
+        frame_lateral,
+        width=220,
+        height=80,
+        corner_radius=12
+    )
+
+    label_cor.pack(
+        padx=15,
+        pady=10
+    )
+
+    label_cor.pack_propagate(
+        False
+    )
+
+    # ---------- LUPA ----------
+
+    ctk.CTkLabel(
+        frame_lateral,
+        text="VISTA AMPLIADA",
+        font=("Arial", 14, "bold")
+    ).pack(
+        anchor="w",
+        padx=15,
+        pady=(15, 5)
+    )
+
+    frame_lupa = ctk.CTkFrame(
+        frame_lateral,
+        width=220,
+        height=220,
+        corner_radius=12
+    )
+
+    frame_lupa.pack(
+        padx=15,
+        pady=5
+    )
+
+    frame_lupa.pack_propagate(
+        False
+    )
+
+    label_lupa = ctk.CTkLabel(
+        frame_lupa,
+        text=""
+    )
+
+    label_lupa.pack(
+        expand=True
+    )
+
+    # ---------- RODAPÉ ----------
+
+    ctk.CTkLabel(
+        frame_lateral,
+        text="Modo inspeção ativo.\nPressione ESC para sair.",
         justify="left"
+    ).pack(
+        anchor="w",
+        padx=15,
+        pady=20
     )
 
-    label_info.pack(pady=10)
-
-    # ---------------- AMOSTRA DE COR ----------------
-
-    label_cor = tk.Label(
-        janela,
-        width=15,
-        height=5,
-        bg="white",
-        relief="solid",
-        bd=2
-    )
-
-    label_cor.pack(pady=10)
-
-    # ---------------- LUPA ----------------
-
-    label_lupa = tk.Label(
-        janela,
-        bd=2,
-        relief="solid"
-    )
-
-    label_lupa.pack(pady=10)
-
-    # ---------------- EVENTO DO MOUSE ----------------
+    # ================= EVENTO =================
 
     def mostrar_pixel(evento):
 
@@ -103,46 +225,118 @@ def abrir_inspetor(imagem):
 
         hex_cor = f"#{r:02X}{g:02X}{b:02X}"
 
-        # informações
+        # ---------- INFO ----------
 
-        label_info.config(
+        label_info.configure(
             text=
             f"Posição: ({x}, {y})\n\n"
             f"RGB: ({r}, {g}, {b})\n\n"
             f"HEX: {hex_cor}"
         )
 
-        # quadrado de cor
+        # ---------- COR ----------
 
-        label_cor.config(
-            bg=hex_cor
+        label_cor.configure(
+            fg_color=hex_cor
         )
 
-        # ---------------- LUPA ----------------
+        # ---------- LUPA ----------
 
-        inicio_x = max(0, x - 10)
-        fim_x = min(largura_original, x + 10)
+        inicio_x = max(
+            0,
+            x - 10
+        )
 
-        inicio_y = max(0, y - 10)
-        fim_y = min(altura_original, y + 10)
+        fim_x = min(
+            largura_original,
+            x + 10
+        )
+
+        inicio_y = max(
+            0,
+            y - 10
+        )
+
+        fim_y = min(
+            altura_original,
+            y + 10
+        )
 
         regiao = imagem[
             inicio_y:fim_y,
             inicio_x:fim_x
         ]
 
-        img_zoom = Image.fromarray(regiao)
+        img_zoom = Image.fromarray(
+            regiao
+        )
 
         img_zoom = img_zoom.resize(
-            (120, 120),
+            (220, 220),
             Image.NEAREST
+        )
+
+        # ---------- MIRA CENTRAL ----------
+
+        draw = ImageDraw.Draw(
+            img_zoom
+        )
+
+        centro = img_zoom.width // 2
+
+        # sombra preta
+
+        draw.line(
+            (
+                centro - 16,
+                centro,
+                centro + 16,
+                centro
+            ),
+            fill="black",
+            width=4
+        )
+
+        draw.line(
+            (
+                centro,
+                centro - 16,
+                centro,
+                centro + 16
+            ),
+            fill="black",
+            width=4
+        )
+
+        # linha branca
+
+        draw.line(
+            (
+                centro - 15,
+                centro,
+                centro + 15,
+                centro
+            ),
+            fill="white",
+            width=2
+        )
+
+        draw.line(
+            (
+                centro,
+                centro - 15,
+                centro,
+                centro + 15
+            ),
+            fill="white",
+            width=2
         )
 
         zoom_tk = ImageTk.PhotoImage(
             img_zoom
         )
 
-        label_lupa.config(
+        label_lupa.configure(
             image=zoom_tk
         )
 
